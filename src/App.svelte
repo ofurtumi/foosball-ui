@@ -1,0 +1,425 @@
+<script lang="ts">
+  import { onMount } from "svelte";
+  import { createGame, getAllGames, getAllUsers } from "./lib/api";
+  import Counter from "./lib/Counter.svelte";
+  import type { Game, User } from "./lib/types";
+  import GoalInput from "./lib/GoalInput.svelte";
+
+  let users: User[] = $state([]);
+  let games: Game[] = $state([]);
+
+  let api_key: string = $state("");
+
+  onMount(async () => {
+    users = await getAllUsers();
+    games = await getAllGames();
+  });
+
+  const positions = ["Goalie", "Defender", "Middle", "Striker"];
+  const used_data: {
+    red: { users: (typeof users)[number][]; positions: string[] };
+    blue: { users: (typeof users)[number][]; positions: string[] };
+  } = {
+    red: { users: [], positions: [] },
+    blue: { users: [], positions: [] },
+  };
+
+  let user_goals: number = $state(0);
+  let selected_user: (typeof users)[number] | undefined = $state();
+  let user_team: "red" | "blue" | undefined = $state();
+  let user_positions: Array<string> = $state([]);
+
+  let red_score = $state(0);
+  let blue_score = $state(0);
+
+  const chosen_users: {
+    name: string;
+    id: number;
+    goals: number;
+    team: "red" | "blue";
+    positions: string[];
+  }[] = $state([]);
+
+  const addUser = () => {
+    console.log(selected_user, user_goals, user_team, user_positions);
+    if (selected_user === undefined) return;
+    if (user_goals === undefined) return;
+    if (user_team === undefined) return;
+
+    chosen_users.push({
+      name: selected_user.name,
+      id: selected_user.id,
+      goals: user_goals,
+      team: user_team,
+      positions: user_positions,
+    });
+
+    used_data[user_team].positions = [
+      ...used_data[user_team].positions,
+      ...user_positions,
+    ];
+    used_data[user_team].users = [...used_data[user_team].users, selected_user];
+
+    user_goals = 0;
+    selected_user = { id: 0, name: "" };
+    user_team = undefined;
+    user_positions = [];
+  };
+
+  const userFilter = (user: (typeof users)[number]) => {
+    return (
+      !used_data.blue.users.some((u) => user.id === u.id) &&
+      !used_data.red.users.some((u) => user.id === u.id)
+    );
+  };
+
+  const submitGame = () => {
+    const red_players = chosen_users
+      .filter((user) => user.team === "red")
+      .map((user) => user.id);
+    const blue_players = chosen_users
+      .filter((user) => user.team === "blue")
+      .map((user) => user.id);
+
+    createGame(red_players, red_score, blue_players, blue_score, api_key);
+  };
+
+  const fancy_date = (date: string) => {
+    return new Date(date).toLocaleDateString();
+  };
+</script>
+
+<main>
+  <div class="users">
+    <label for="select-user">Select users</label>
+    <select id="select-user" bind:value={selected_user}>
+      {#each users.filter(userFilter) as user}
+        <option value={user}>{user.name}</option>
+      {/each}
+    </select>
+
+    <div class="teams">
+      <Counter bind:count={user_goals} />
+      <div class="positions red">
+        {#each positions as position, index}
+          <div>
+            <label for="red-{position}">{position}</label>
+            <input
+              type="checkbox"
+              name="red-{position}"
+              id="red-{position}"
+              value={index}
+              oninput={(e) => {
+                if (user_team === undefined) user_team = "red";
+                const target = e?.target as HTMLInputElement;
+
+                if (user_positions.includes(position)) {
+                  user_positions = user_positions.filter(
+                    (pos) => pos !== position
+                  );
+                }
+
+                if (target.checked) {
+                  user_positions.push(position);
+                }
+              }}
+              disabled={user_team === "blue" ||
+                used_data.red.positions.includes(position)}
+            />
+          </div>
+        {/each}
+      </div>
+
+      <div class="positions blue">
+        {#each positions as position, index}
+          <div>
+            <label for="red-{position}">{position}</label>
+            <input
+              type="checkbox"
+              name="red-{position}"
+              id="red-{position}"
+              value={index}
+              oninput={(e) => {
+                if (user_team === undefined) user_team = "blue";
+                const target = e?.target as HTMLInputElement;
+
+                if (user_positions.includes(position)) {
+                  user_positions = user_positions.filter(
+                    (pos) => pos !== position
+                  );
+                }
+
+                if (target.checked) {
+                  user_positions.push(position);
+                }
+              }}
+              disabled={user_team === "red" ||
+                used_data.blue.positions.includes(position)}
+            />
+          </div>
+        {/each}
+      </div>
+    </div>
+
+    <div class="input-row">
+      <button onclick={() => addUser()}>Add player</button>
+    </div>
+
+    <div class="chosen-players red">
+      <div class="score">
+        <h2>Red team</h2>
+        <h2>Score: {red_score}</h2>
+      </div>
+      <ul class="player-rows">
+        {#each chosen_users.filter((user) => user.team === "red") as user}
+          <li class="player-row">
+            <h3>{user.name}</h3>
+            <div>
+              {#each user.positions as pos}
+                <span>{pos}</span>
+              {/each}
+            </div>
+            <span>Goals: {user.goals}</span>
+          </li>
+        {/each}
+      </ul>
+    </div>
+    <GoalInput bind:score={red_score} --color="var(--red-1)" />
+
+    <div class="chosen-players blue">
+      <div class="score">
+        <h2>Blue team</h2>
+        <h2>Score: {blue_score}</h2>
+      </div>
+      <ul class="player-rows">
+        {#each chosen_users.filter((user) => user.team === "blue") as user}
+          <li class="player-row">
+            <h3>{user.name}</h3>
+            <div>
+              {#each user.positions as pos}
+                <span>{pos}</span>
+              {/each}
+            </div>
+            <span>Goals: {user.goals}</span>
+          </li>
+        {/each}
+      </ul>
+    </div>
+    <GoalInput bind:score={blue_score} --color="var(--blue-1)" />
+
+    <div class="submit-container">
+      <input type="text" bind:value={api_key} placeholder="API key"/>
+      <button onclick={submitGame}>Submit game</button>
+    </div>
+  </div>
+
+  <div class="game-container">
+    {#each games as game}
+      <div class="game">
+        <span>{fancy_date(game.date)}</span>
+        <div class="red">
+          <div>
+            <GoalInput
+              score={game.teamRedScore}
+              --color="var(--red-1)"
+              disabled
+            />
+            <span>{game.teamRedScore}</span>
+          </div>
+
+          <ul>
+            {#each game.players.filter((player) => player.team === "RED") as player}
+              <li>{player.name}</li>
+            {/each}
+          </ul>
+        </div>
+        <div class="blue">
+          <div>
+            <GoalInput
+              score={game.teamBlueScore}
+              --color="var(--blue-1)"
+              disabled
+            />
+            <span>{game.teamBlueScore}</span>
+          </div>
+
+          <ul>
+            {#each game.players.filter((player) => player.team === "BLUE") as player}
+              <li>{player.name}</li>
+            {/each}
+          </ul>
+        </div>
+      </div>
+    {/each}
+  </div>
+</main>
+
+<style>
+  main {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    grid-template-columns: 1fr 3fr;
+    background: var(--green-1);
+  }
+
+  .users {
+    padding: 1rem;
+    margin: 0.5rem;
+    margin-right: 0;
+    background: var(--green-2);
+    display: flex;
+    flex-direction: column;
+    border-radius: 0.5rem;
+    gap: 1rem;
+  }
+
+  input, select {
+    padding: 0.5rem;
+    font-size: 1rem;
+    background: var(--green-3);
+    border: none;
+    border-radius: 0.25rem;
+  }
+
+  .input-row {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    gap: 0.5rem;
+  }
+
+  .chosen-players {
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+  }
+
+  .teams {
+    display: flex;
+    width: 100%;
+    gap: 1rem;
+  }
+
+  .positions {
+    border-radius: 0.5rem;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.5rem;
+
+    & > div {
+      display: flex;
+      justify-content: space-between;
+      flex-direction: row-reverse;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    & input {
+      width: 1.25rem;
+      height: 1.25rem;
+      background: var(--green-3);
+      border: none;
+    }
+  }
+
+  .score {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .blue {
+    background: var(--blue-1);
+  }
+
+  .red {
+    background: var(--red-1);
+  }
+
+  .player-rows {
+    padding-inline-start: 0;
+    padding: 0;
+    margin: 0;
+  }
+
+  .red .player-row {
+    background: var(--red-1);
+  }
+
+  .blue .player-row {
+    background: var(--blue-1);
+  }
+
+  .player-row {
+    list-style: none;
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+
+    display: grid;
+    grid-template-columns: 1fr auto;
+
+    & > div {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      grid-row: span 2;
+      grid-column: 2;
+      place-content: center;
+      align-items: end;
+    }
+  }
+
+  .submit-container{
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .game-container {
+    padding: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    overflow-y: scroll;
+  }
+
+  .game {
+    background: var(--green-2);
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    border-radius: 0.5rem;
+
+    & div {
+      background: inherit;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+
+      & ul {
+        display: flex;
+        gap: 0.5rem;
+
+        & li {
+          padding: 0.5rem;
+          border-radius: 0.25rem;
+        }
+      }
+    }
+
+    & .red ul li {
+      background: var(--red-1);
+    }
+
+    & .blue ul li {
+      background: var(--blue-1);
+    }
+  }
+</style>
