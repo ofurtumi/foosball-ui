@@ -224,7 +224,7 @@
               --color="var(--red-1)"
               disabled
             />
-            <span>{game.teamRedScore}</span>
+            <span class="desktop-counter">{game.teamRedScore}</span>
           </div>
 
           <ul>
@@ -240,7 +240,7 @@
               --color="var(--blue-1)"
               disabled
             />
-            <span>{game.teamBlueScore}</span>
+            <span class="desktop-counter">{game.teamBlueScore}</span>
           </div>
 
           <ul>
@@ -420,6 +420,31 @@
 
     & .blue ul li {
       background: var(--blue-1);
+    }
+  }
+
+  @media (max-width: 768px) {
+    main {
+      display: flex;
+      flex-direction: column;
+      overflow-y: scroll;
+    }
+
+    .users {
+      margin: 0.5rem;
+    }
+
+    .game-container {
+      overflow-y:visible;
+    }
+
+    .desktop-counter {
+      display: none;
+    }
+  
+    .game div {
+      flex-direction: column;
+      gap: 0.5rem;
     }
   }
 </style>
