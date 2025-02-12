@@ -1,4 +1,5 @@
 import type { Game, User } from "./types";
+import type { paths } from "../types/schema.d.ts";
 
 const base_url = "https://foosball.steini-b11.workers.dev";
 
@@ -26,8 +27,9 @@ export const createGame = async (
   await fetch(`${base_url}/games/new`, {
     method: "POST",
     headers: {
+      accept: "json",
       "Content-Type": "application/json",
-      Authentication: `Bearer ${api_key}`,
+      Authorization: `Bearer ${api_key}`,
     },
     body: JSON.stringify({
       redTeamPlayers: red_players,
@@ -37,4 +39,3 @@ export const createGame = async (
     }),
   });
 };
-
