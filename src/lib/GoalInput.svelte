@@ -27,6 +27,7 @@
   button {
     aspect-ratio: 1;
     max-height: 3rem;
+    height: 2rem;
 
     @media screen and (max-width: 438px) {
       height: 1.25rem;
