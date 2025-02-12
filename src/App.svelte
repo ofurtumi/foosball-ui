@@ -208,7 +208,7 @@
     <GoalInput bind:score={blue_score} --color="var(--blue-1)" />
 
     <div class="submit-container">
-      <input type="text" bind:value={api_key} placeholder="API key"/>
+      <input type="password" bind:value={api_key} placeholder="API key"/>
       <button onclick={submitGame}>Submit game</button>
     </div>
   </div>
