@@ -6,7 +6,7 @@
   {#each Array.from({ length: 10 }) as _, i}
     <!-- svelte-ignore a11y_consider_explicit_label -->
     <button
-      disabled={disabled}
+      {disabled}
       onclick={() => {
         if (score === i + 1) score = i;
         else score = i + 1;
@@ -26,11 +26,14 @@
 
   button {
     aspect-ratio: 1;
-    height: 2rem;
+    max-height: 3rem;
+
+    @media screen and (max-width: 438px) {
+      height: 1.25rem;
+    }
   }
 
   .selected {
     background: var(--color);
   }
-
 </style>
