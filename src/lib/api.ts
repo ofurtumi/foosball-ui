@@ -23,8 +23,8 @@ export const createGame = async (
   blue_players: number[],
   blue_score: number,
   api_key: string,
-): Promise<void> => {
-  await fetch(`${base_url}/games/new`, {
+): Promise<boolean> => {
+  const success = await fetch(`${base_url}/games/new`, {
     method: "POST",
     headers: {
       accept: "json",
@@ -38,4 +38,10 @@ export const createGame = async (
       blueTeamScore: blue_score,
     }),
   });
+
+  if (!success.ok) {
+    throw new Error("Failed to create game");
+  }
+
+  return success.ok;
 };

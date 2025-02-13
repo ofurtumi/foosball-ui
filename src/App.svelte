@@ -4,16 +4,27 @@
   import Counter from "./lib/Counter.svelte";
   import type { Game, User } from "./lib/types";
   import GoalInput from "./lib/GoalInput.svelte";
+  import toast, { Toaster } from "svelte-french-toast";
 
   let users: User[] = $state([]);
   let games: Game[] = $state([]);
 
+  let submitted = $state(false);
+
   let api_key: string = $state("");
 
   onMount(async () => {
-    users = await getAllUsers();
-    games = await getAllGames();
+    toast.promise(getData(), {
+      loading: "Loading data...",
+      success: "Data loaded!",
+      error: "Failed to load data",
+    });
   });
+
+  const getData = async () => {
+    if (users.length === 0) users = await getAllUsers();
+    games = await getAllGames();
+  };
 
   const positions = ["Goalie", "Defender", "Middle", "Striker"];
   const used_data: {
@@ -73,7 +84,7 @@
     );
   };
 
-  const submitGame = () => {
+  const submitGame = async () => {
     const red_players = chosen_users
       .filter((user) => user.team === "red")
       .map((user) => user.id);
@@ -81,7 +92,25 @@
       .filter((user) => user.team === "blue")
       .map((user) => user.id);
 
-    createGame(red_players, red_score, blue_players, blue_score, api_key);
+    let res = await createGame(
+      red_players,
+      red_score,
+      blue_players,
+      blue_score,
+      api_key
+    );
+    if (res) {
+      toast.promise(getData(), {
+        loading: "Loading data...",
+        success: "Data loaded!",
+        error: "Failed to load data",
+      });
+      chosen_users.length = 0;
+      red_score = 0;
+      blue_score = 0;
+      used_data.red = { users: [], positions: [] };
+      used_data.blue = { users: [], positions: [] };
+    }
   };
 
   const fancy_date = (date: string) => {
@@ -90,6 +119,7 @@
 </script>
 
 <main>
+  <Toaster />
   <div class="users">
     <label for="select-user">Select users</label>
     <select id="select-user" bind:value={selected_user}>
@@ -208,8 +238,16 @@
     <GoalInput bind:score={blue_score} --color="var(--blue-1)" />
 
     <div class="submit-container">
-      <input type="password" bind:value={api_key} placeholder="API key"/>
-      <button onclick={submitGame}>Submit game</button>
+      <input type="password" bind:value={api_key} placeholder="API key" />
+      <button
+        onclick={() => {
+          toast.promise(submitGame(), {
+            loading: "Submitting game",
+            success: "Game submitted",
+            error: "Could not submit game",
+          });
+        }}>Submit game</button
+      >
     </div>
   </div>
 
@@ -274,7 +312,8 @@
     gap: 1rem;
   }
 
-  input, select {
+  input,
+  select {
     padding: 0.5rem;
     font-size: 1rem;
     background: var(--green-3);
@@ -373,11 +412,16 @@
     }
   }
 
-  .submit-container{
+  .submit-container {
     margin-top: auto;
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+
+    & > div {
+      display: flex;
+      justify-content: center;
+    }
   }
 
   .game-container {
@@ -435,13 +479,13 @@
     }
 
     .game-container {
-      overflow-y:visible;
+      overflow-y: visible;
     }
 
     .desktop-counter {
       display: none;
     }
-  
+
     .game div {
       flex-direction: column;
       gap: 0.5rem;
