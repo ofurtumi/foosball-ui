@@ -291,18 +291,12 @@
             <ul>
               {#each game.players.filter((player) => player.team === "RED") as player}
                 <li>
-                  <button
-                    onclick={async () => {
-                      const player_id = users.find(
-                        (user) => user.name === player.name
-                      )?.id;
-                      if (!player_id) return;
-                      const data = await getPlayerByIdStats(player_id);
-                      console.log(data);
-                    }}
-                  >
-                    {player.name}
-                  </button>
+                  <StatModal
+                    name={player.name}
+                    team="red"
+                    stats={stats[player.name]}
+                    getStats={getAndSetPlayerStats}
+                  />
                 </li>
               {/each}
             </ul>
@@ -326,18 +320,6 @@
                     stats={stats[player.name]}
                     getStats={getAndSetPlayerStats}
                   />
-                  <!-- <button
-                    onclick={async () => {
-                      const player_id = users.find(
-                        (user) => user.name === player.name
-                      )?.id;
-                      if (!player_id) return;
-                      const data = await getPlayerByIdStats(player_id);
-                      console.log(data);
-                    }}
-                  >
-                    {player.name}
-                  </button> -->
                 </li>
               {/each}
             </ul>

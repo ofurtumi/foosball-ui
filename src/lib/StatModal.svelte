@@ -174,4 +174,10 @@
       mask-image: radial-gradient(transparent 50%, black 50%);
     }
   }
+
+  @media (max-width: 768px) {
+    dialog {
+      font-size: 0.65rem;
+    }
+  }
 </style>
