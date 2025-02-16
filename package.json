@@ -7,19 +7,24 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "check": "svelte-check --tsconfig ./tsconfig.app.json && tsc -p tsconfig.node.json"
+    "check": "svelte-check --tsconfig ./tsconfig.app.json && tsc -p tsconfig.node.json",
+    "generate": "openapi-typescript https://foosball.steini-b11.workers.dev/openapi -o ./src/schema.ts"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^5.0.3",
     "@tsconfig/svelte": "^5.0.4",
+    "openapi-fetch": "^0.13.4",
+    "openapi-typescript": "^7.6.1",
+    "openapi-typescript-fetch": "^2.1.0",
     "svelte": "^5.19.6",
     "svelte-check": "^4.1.4",
     "svelte-confetti": "^2.0.0",
     "typescript": "~5.7.2",
     "vite": "^6.1.0"
   },
-  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e",
+  "packageManager": "yarn@1.22.22",
   "dependencies": {
+    "lucide-svelte": "^0.475.0",
     "svelte-french-toast": "^1.2.0"
   }
 }

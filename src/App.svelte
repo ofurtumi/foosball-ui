@@ -1,15 +1,22 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { createGame, getAllGames, getAllUsers } from "./lib/api";
+  import {
+    createGame,
+    getAllGames,
+    getAllUsers,
+    getPlayerByIdStats,
+    type GetAllGamesResponse,
+    type GetAllUsersResponse,
+    type GetPlayerByIdStatsResponse,
+  } from "./lib/api";
   import Counter from "./lib/Counter.svelte";
-  import type { Game, User } from "./lib/types";
   import GoalInput from "./lib/GoalInput.svelte";
   import toast, { Toaster } from "svelte-french-toast";
+  import StatModal from "./lib/StatModal.svelte";
 
-  let users: User[] = $state([]);
-  let games: Game[] = $state([]);
-
-  let submitted = $state(false);
+  let users: GetAllUsersResponse = $state([]);
+  let games: GetAllGamesResponse = $state([]);
+  let stats: Record<string, GetPlayerByIdStatsResponse> = $state({});
 
   let api_key: string = $state("");
 
@@ -92,13 +99,13 @@
       .filter((user) => user.team === "blue")
       .map((user) => user.id);
 
-    let res = await createGame(
-      red_players,
-      red_score,
-      blue_players,
-      blue_score,
-      api_key
-    );
+    const body = {
+      redTeamPlayers: red_players,
+      redTeamScore: red_score,
+      blueTeamPlayers: blue_players,
+      blueTeamScore: blue_score,
+    };
+    let res = await createGame(body, api_key);
     if (res) {
       toast.promise(getData(), {
         loading: "Loading data...",
@@ -116,6 +123,15 @@
   const fancy_date = (date: string) => {
     return new Date(date).toLocaleDateString();
   };
+
+  const getAndSetPlayerStats = async (player: string) => {
+    if (stats[player]) return stats[player];
+
+    const player_id = users.find((user) => user.name === player)?.id!;
+    const data = await getPlayerByIdStats(player_id);
+    stats[player] = data;
+    return data;
+  };
 </script>
 
 <main>
@@ -123,9 +139,13 @@
   <div class="users">
     <label for="select-user">Select users</label>
     <select id="select-user" bind:value={selected_user}>
-      {#each users.filter(userFilter) as user}
-        <option value={user}>{user.name}</option>
-      {/each}
+      {#await users}
+        <option>Loading...</option>
+      {:then users}
+        {#each users.filter(userFilter) as user}
+          <option value={user}>{user.name}</option>
+        {/each}
+      {/await}
     </select>
 
     <div class="teams">
@@ -252,43 +272,79 @@
   </div>
 
   <div class="game-container">
-    {#each games as game}
-      <div class="game">
-        <span>{fancy_date(game.date)}</span>
-        <div class="red">
-          <div>
-            <GoalInput
-              score={game.teamRedScore}
-              --color="var(--red-1)"
-              disabled
-            />
-            <span class="desktop-counter">{game.teamRedScore}</span>
-          </div>
+    {#await games}
+      <h2>Loading games...</h2>
+    {:then games}
+      {#each games as game}
+        <div class="game">
+          <span>{fancy_date(game.date)}</span>
+          <div class="red">
+            <div>
+              <GoalInput
+                score={game.teamRedScore}
+                --color="var(--red-1)"
+                disabled
+              />
+              <span class="desktop-counter">{game.teamRedScore}</span>
+            </div>
 
-          <ul>
-            {#each game.players.filter((player) => player.team === "RED") as player}
-              <li>{player.name}</li>
-            {/each}
-          </ul>
-        </div>
-        <div class="blue">
-          <div>
-            <GoalInput
-              score={game.teamBlueScore}
-              --color="var(--blue-1)"
-              disabled
-            />
-            <span class="desktop-counter">{game.teamBlueScore}</span>
+            <ul>
+              {#each game.players.filter((player) => player.team === "RED") as player}
+                <li>
+                  <button
+                    onclick={async () => {
+                      const player_id = users.find(
+                        (user) => user.name === player.name
+                      )?.id;
+                      if (!player_id) return;
+                      const data = await getPlayerByIdStats(player_id);
+                      console.log(data);
+                    }}
+                  >
+                    {player.name}
+                  </button>
+                </li>
+              {/each}
+            </ul>
           </div>
+          <div class="blue">
+            <div>
+              <GoalInput
+                score={game.teamBlueScore}
+                --color="var(--blue-1)"
+                disabled
+              />
+              <span class="desktop-counter">{game.teamBlueScore}</span>
+            </div>
 
-          <ul>
-            {#each game.players.filter((player) => player.team === "BLUE") as player}
-              <li>{player.name}</li>
-            {/each}
-          </ul>
+            <ul>
+              {#each game.players.filter((player) => player.team === "BLUE") as player}
+                <li>
+                  <StatModal
+                    name={player.name}
+                    team="blue"
+                    stats={stats[player.name]}
+                    getStats={getAndSetPlayerStats}
+                  />
+                  <!-- <button
+                    onclick={async () => {
+                      const player_id = users.find(
+                        (user) => user.name === player.name
+                      )?.id;
+                      if (!player_id) return;
+                      const data = await getPlayerByIdStats(player_id);
+                      console.log(data);
+                    }}
+                  >
+                    {player.name}
+                  </button> -->
+                </li>
+              {/each}
+            </ul>
+          </div>
         </div>
-      </div>
-    {/each}
+      {/each}
+    {/await}
   </div>
 </main>
 
@@ -417,11 +473,6 @@
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
-
-    & > div {
-      display: flex;
-      justify-content: center;
-    }
   }
 
   .game-container {
@@ -451,18 +502,18 @@
         display: flex;
         gap: 0.5rem;
 
-        & li {
+        & li button {
           padding: 0.5rem;
           border-radius: 0.25rem;
         }
       }
     }
 
-    & .red ul li {
+    & .red button {
       background: var(--red-1);
     }
 
-    & .blue ul li {
+    & .blue button {
       background: var(--blue-1);
     }
   }

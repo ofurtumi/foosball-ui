@@ -1,47 +1,58 @@
-import type { Game, User } from "./types";
-import type { paths } from "../types/schema.d.ts";
+import type { paths, operations } from "../schema";
 
-const base_url = "https://foosball.steini-b11.workers.dev";
 
-export const getAllUsers = async (): Promise<User[]> => {
-  const data = await fetch(`${base_url}/players/all`).then(
-    async (res) => await res.json(),
-  );
-  return data as User[];
+const baseUrl = "https://foosball.steini-b11.workers.dev";
+
+export type GetUserByIdResponse = operations["getPlayersById"]["responses"]["200"]["content"]['text/plain']
+export const getUserById = async (id: number): Promise<GetUserByIdResponse> => {
+  const data = await fetch(`${baseUrl}/players/${id}`);
+  return data.json()
+}
+
+export type GetAllUsersResponse = { id: number, name: string }[] // operations['/players/all']['get']['responses']['200']['content']['json']
+export const getAllUsers = async (): Promise<GetAllUsersResponse> => {
+  const data = await fetch(`${baseUrl}/players/all`);
+  return data.json();
 };
 
-export const getAllGames = async (): Promise<Game[]> => {
-  const data = await fetch(`${base_url}/games/all`).then(
-    async (res) => await res.json(),
-  );
-  return data as Game[];
+export type GetAllGamesResponse = operations['getGamesAll']['responses']['200']['content']['json']
+export const getAllGames = async (): Promise<GetAllGamesResponse> => {
+  const data = await fetch(`${baseUrl}/games/all`);
+  return data.json()
 };
 
-export const createGame = async (
-  red_players: number[],
-  red_score: number,
-  blue_players: number[],
-  blue_score: number,
-  api_key: string,
-): Promise<boolean> => {
-  const success = await fetch(`${base_url}/games/new`, {
+export type GetGameByIdResponse = operations['getGamesById']['responses']['200']['content']['json']
+export const getGameById = async (id: number): Promise<GetGameByIdResponse> => {
+  const data = await fetch(`${baseUrl}/games/${id}`);
+  return data.json()
+}
+
+export type PostCreateGameBody = NonNullable<operations['postGamesNew']['requestBody']>['content']['application/json']
+export const createGame = async (body: PostCreateGameBody, apiKey: string): Promise<boolean> => {
+  const data = await fetch(`${baseUrl}/games/new`, {
     method: "POST",
     headers: {
-      accept: "json",
       "Content-Type": "application/json",
-      Authorization: `Bearer ${api_key}`,
+      "Authorization": `Bearer ${ apiKey }`
     },
-    body: JSON.stringify({
-      redTeamPlayers: red_players,
-      redTeamScore: red_score,
-      blueTeamPlayers: blue_players,
-      blueTeamScore: blue_score,
-    }),
+    body: JSON.stringify(body)
   });
 
-  if (!success.ok) {
-    throw new Error("Failed to create game");
-  }
+  return data.ok;
+}
 
-  return success.ok;
-};
+export type GetPlayerByIdStatsResponse = {
+  name: string,
+  id: number,
+  wins: number,
+  losses: number,
+  totalGames: number,
+  howOftenBlue: number,
+  howOftenRed: number,
+  winsAsBlue: number,
+  winsAsRed: number
+} // operations['getPlayersByIdStats']['responses']['200']['content']['json']
+export const getPlayerByIdStats = async (id: number): Promise<GetPlayerByIdStatsResponse> => {
+  const data = await fetch(`${baseUrl}/players/${id}/stats`);
+  return data.json()
+}

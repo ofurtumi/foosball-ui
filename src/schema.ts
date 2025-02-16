@@ -55,6 +55,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/players/all/stats": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Get statistics for all players */
+        get: operations["getPlayersAllStats"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/players/all": {
         parameters: {
             query?: never;
@@ -100,6 +117,23 @@ export interface paths {
         put?: never;
         /** @description Create a new player */
         post: operations["postPlayersNew"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/players/{id}/stats": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Get statistics for a single player */
+        get: operations["getPlayersByIdStats"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -207,6 +241,26 @@ export interface operations {
             };
         };
     };
+    getPlayersAllStats: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description App players statistics */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    json: unknown[];
+                };
+            };
+        };
+    };
     getPlayersAll: {
         parameters: {
             query?: never;
@@ -266,6 +320,28 @@ export interface operations {
         responses: {
             /** @description New player created */
             201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    json: Record<string, never>;
+                };
+            };
+        };
+    };
+    getPlayersByIdStats: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Get statistics for a single player */
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
