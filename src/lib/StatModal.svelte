@@ -51,8 +51,8 @@
             style="--win-percentage: {(stats.wins / stats.totalGames) *
               100}%; --counted-percentage: var(--green-1); --filler-percentage: var(--green-2);"
           >
-            <h3>Won: {stats.wins} ({win_percent}%)</h3>
-            <h3>Lost: {stats.losses} ({loss_percent}%)</h3>
+            <h3>Won: {stats.wins} ({win_percent.toFixed(2)}%)</h3>
+            <h3>Lost: {stats.losses} ({loss_percent.toFixed(2)}%)</h3>
           </div>
 
           <div
@@ -83,6 +83,12 @@
 </div>
 
 <style>
+  @property --offset {
+    syntax: "<percentage>";
+    inherits: false;
+    initial-value: 0%;
+  }
+
   .stat-modal > button {
     padding: 0.5rem;
     border-radius: 0.25rem;
@@ -174,6 +180,8 @@
       mask-image: radial-gradient(transparent 50%, black 50%);
     }
   }
+
+  @keyframes 
 
   @media (max-width: 768px) {
     dialog {
