@@ -118,16 +118,14 @@
         success: "Data loaded!",
         error: "Failed to load data",
       });
-    chosen_users.length = 0;
-    red_score = 0;
-    blue_score = 0;
-    used_data.red = { users: [], positions: [] };
-    used_data.blue = { users: [], positions: [] };
-    user_team = undefined;
-    user_positions = [];
-
-    
-    // }
+      chosen_users.length = 0;
+      red_score = 0;
+      blue_score = 0;
+      used_data.red = { users: [], positions: [] };
+      used_data.blue = { users: [], positions: [] };
+      user_team = undefined;
+      user_positions = [];
+    }
   };
 
   const fancy_date = (date: string) => {
@@ -183,7 +181,8 @@
                   user_positions.push(position);
                 }
               }}
-              checked={user_positions.includes(position) || used_data.red.positions.includes(position)}
+              checked={user_positions.includes(position) ||
+                used_data.red.positions.includes(position)}
               disabled={user_team === "blue" ||
                 used_data.red.positions.includes(position)}
             />
@@ -214,7 +213,8 @@
                   user_positions.push(position);
                 }
               }}
-              checked={user_positions.includes(position) || used_data.blue.positions.includes(position)}
+              checked={user_positions.includes(position) ||
+                used_data.blue.positions.includes(position)}
               disabled={user_team === "red" ||
                 used_data.blue.positions.includes(position)}
             />
