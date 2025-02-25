@@ -47,7 +47,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** @description Create a new game */
+        /** @description Create a new game. NOTE: Playerpositions. Goalie=0, Defender=1, Middle=2, Striker=3 */
         post: operations["postGamesNew"];
         delete?: never;
         options?: never;
@@ -222,8 +222,14 @@ export interface operations {
                 "application/json": {
                     redTeamScore: number;
                     blueTeamScore: number;
-                    redTeamPlayers: number[];
-                    blueTeamPlayers: number[];
+                    redTeamPlayers: {
+                        playerId: number;
+                        playerPositions: (0 | 1 | 2 | 3)[];
+                    }[];
+                    blueTeamPlayers: {
+                        playerId: number;
+                        playerPositions: (0 | 1 | 2 | 3)[];
+                    }[];
                 };
             };
         };

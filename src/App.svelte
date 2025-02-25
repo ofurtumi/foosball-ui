@@ -34,13 +34,13 @@
   };
 
   const positions = ["Goalie", "Defender", "Middle", "Striker"];
-  const used_data: {
-    red: { users: (typeof users)[number][]; positions: string[] };
-    blue: { users: (typeof users)[number][]; positions: string[] };
-  } = {
+  let used_data: {
+    red: { users: typeof users; positions: string[] };
+    blue: { users: typeof users; positions: string[] };
+  } = $state({
     red: { users: [], positions: [] },
     blue: { users: [], positions: [] },
-  };
+  });
 
   let user_goals: number = $state(0);
   let selected_user: (typeof users)[number] | undefined = $state();
@@ -91,20 +91,26 @@
     );
   };
 
-  const submitGame = async () => {
-    const red_players = chosen_users
-      .filter((user) => user.team === "red")
-      .map((user) => user.id);
-    const blue_players = chosen_users
-      .filter((user) => user.team === "blue")
-      .map((user) => user.id);
+  const getTeam = (team: "blue" | "red") =>
+    chosen_users
+      .filter((user) => user.team === team)
+      .map((user) => ({
+        playerId: user.id,
+        playerPositions: user.positions.map(
+          (pos) => Number(positions.indexOf(pos)) as 0 | 1 | 2 | 3
+        ),
+      }));
 
+  const submitGame = async () => {
     const body = {
-      redTeamPlayers: red_players,
+      redTeamPlayers: getTeam("red"),
       redTeamScore: red_score,
-      blueTeamPlayers: blue_players,
+      blueTeamPlayers: getTeam("blue"),
       blueTeamScore: blue_score,
     };
+
+    console.log(used_data);
+    console.log(body);
     let res = await createGame(body, api_key);
     if (res) {
       toast.promise(getData(), {
@@ -112,12 +118,16 @@
         success: "Data loaded!",
         error: "Failed to load data",
       });
-      chosen_users.length = 0;
-      red_score = 0;
-      blue_score = 0;
-      used_data.red = { users: [], positions: [] };
-      used_data.blue = { users: [], positions: [] };
-    }
+    chosen_users.length = 0;
+    red_score = 0;
+    blue_score = 0;
+    used_data.red = { users: [], positions: [] };
+    used_data.blue = { users: [], positions: [] };
+    user_team = undefined;
+    user_positions = [];
+
+    
+    // }
   };
 
   const fancy_date = (date: string) => {
@@ -173,6 +183,7 @@
                   user_positions.push(position);
                 }
               }}
+              checked={user_positions.includes(position) || used_data.red.positions.includes(position)}
               disabled={user_team === "blue" ||
                 used_data.red.positions.includes(position)}
             />
@@ -203,6 +214,7 @@
                   user_positions.push(position);
                 }
               }}
+              checked={user_positions.includes(position) || used_data.blue.positions.includes(position)}
               disabled={user_team === "red" ||
                 used_data.blue.positions.includes(position)}
             />

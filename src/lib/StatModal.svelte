@@ -57,8 +57,9 @@
 
           <div
             class="percentage"
+            data-win={(stats.howOftenRed / stats.totalGames) * 100}
             style="--win-percentage: {(stats.howOftenRed / stats.totalGames) *
-              100}%; --counted-percentage: var(--red-1); --filler-percentage: var(--blue-1);"
+              100}; --counted-percentage: var(--red-1); --filler-percentage: var(--blue-1);"
           >
             <h2>Games as</h2>
             <h3>
@@ -84,6 +85,12 @@
 
 <style>
   @property --offset {
+    syntax: "<percentage>";
+    inherits: false;
+    initial-value: 0%;
+  }
+
+  @property --win-recentage {
     syntax: "<percentage>";
     inherits: false;
     initial-value: 0%;
@@ -159,6 +166,12 @@
     flex: 1;
   }
 
+  @keyframes fill_percentage {
+    to {
+      --offset: 50%;
+    }
+  }
+
   .percentage {
     position: relative;
     width: 100%;
@@ -167,6 +180,7 @@
     place-content: center;
     --counted-percentage: red;
     --filler-percentage: blue;
+    --offset: 0%;
 
     &::after {
       content: "";
@@ -174,14 +188,27 @@
       position: absolute;
       border-radius: 50%;
       background-image: conic-gradient(
-        var(--counted-percentage) var(--win-percentage),
+        var(--counted-percentage) var(--offset),
         var(--filler-percentage) 0deg
       );
       mask-image: radial-gradient(transparent 50%, black 50%);
+      transition: --offset 0.5s ease;
+      /* transition-delay: 2.3s; */
+
+      animation: fill_percentage 1.5s ease forwards;
+
+      /* @keyframes fill_percentage {
+        to {
+          --offset: 90%;
+        }
+      } */
+    }
+
+    &:hover::after {
+      /* animation: fill_percentage 0.2s ease forwards; */
+      --offset: var(--win-percentage);
     }
   }
-
-  @keyframes 
 
   @media (max-width: 768px) {
     dialog {
