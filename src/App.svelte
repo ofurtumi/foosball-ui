@@ -109,8 +109,6 @@
       blueTeamScore: blue_score,
     };
 
-    console.log(used_data);
-    console.log(body);
     let res = await createGame(body, api_key);
     if (res) {
       toast.promise(getData(), {
@@ -181,8 +179,7 @@
                   user_positions.push(position);
                 }
               }}
-              checked={user_positions.includes(position) ||
-                used_data.red.positions.includes(position)}
+              checked={used_data.red.positions.includes(position)}
               disabled={user_team === "blue" ||
                 used_data.red.positions.includes(position)}
             />
@@ -213,8 +210,7 @@
                   user_positions.push(position);
                 }
               }}
-              checked={user_positions.includes(position) ||
-                used_data.blue.positions.includes(position)}
+              checked={used_data.blue.positions.includes(position)}
               disabled={user_team === "red" ||
                 used_data.blue.positions.includes(position)}
             />

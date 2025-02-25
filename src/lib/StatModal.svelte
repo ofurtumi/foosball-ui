@@ -59,7 +59,7 @@
             class="percentage"
             data-win={(stats.howOftenRed / stats.totalGames) * 100}
             style="--win-percentage: {(stats.howOftenRed / stats.totalGames) *
-              100}; --counted-percentage: var(--red-1); --filler-percentage: var(--blue-1);"
+              100}%; --counted-percentage: var(--red-1); --filler-percentage: var(--blue-1);"
           >
             <h2>Games as</h2>
             <h3>
@@ -168,7 +168,7 @@
 
   @keyframes fill_percentage {
     to {
-      --offset: 50%;
+      --offset: var(--win-percentage);
     }
   }
 
