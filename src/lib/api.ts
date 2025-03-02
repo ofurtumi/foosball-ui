@@ -56,3 +56,8 @@ export const getPlayerByIdStats = async (id: number): Promise<GetPlayerByIdStats
   const data = await fetch(`${baseUrl}/players/${id}/stats`);
   return data.json()
 }
+
+export const getAllStats = async (): Promise<operations['getPlayersAllStats']['responses']['200']['content']['json']> => {
+  const data = await fetch(`${baseUrl}/players/all/stats`);
+  return data.json()
+}
