@@ -32,7 +32,7 @@
   };
 </script>
 
-<div class="game-container">
+<div class="game-container scroll-mask">
   {#await games}
     <h2>Loading games...</h2>
   {:then games}
@@ -102,7 +102,7 @@
   .game-container {
     padding: 0.5rem;
     display: flex;
-    flex-direction: column;
+    flex-direction: column-reverse;
     gap: 0.5rem;
     overflow-y: scroll;
   }
@@ -114,6 +114,7 @@
     flex-direction: column;
     gap: 0.5rem;
     border-radius: 0.5rem;
+    margin-top: 0.5rem;
 
     & div {
       background: inherit;
@@ -126,21 +127,11 @@
         display: flex;
         gap: 0.5rem;
 
-        & li button {
-          padding: 0.5rem;
-          border-radius: 0.25rem;
-        }
       }
     }
   }
 
   @media (max-width: 768px) {
-    main {
-      display: flex;
-      flex-direction: column;
-      overflow-y: scroll;
-    }
-
     .game-container {
       overflow-y: visible;
     }

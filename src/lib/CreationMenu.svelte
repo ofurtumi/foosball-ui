@@ -259,12 +259,12 @@
   .users {
     padding: 1rem;
     margin: 0.5rem;
-    margin-right: 0;
     background: var(--green-2);
     display: flex;
     flex-direction: column;
     border-radius: 0.5rem;
     gap: 1rem;
+    margin-top: 1rem;
   }
 
   input,
@@ -364,10 +364,6 @@
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
-  }
-
-  .users {
-    margin: 0.5rem;
   }
 
   .blue {

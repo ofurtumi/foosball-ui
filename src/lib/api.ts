@@ -57,7 +57,26 @@ export const getPlayerByIdStats = async (id: number): Promise<GetPlayerByIdStats
   return data.json()
 }
 
-export const getAllStats = async (): Promise<operations['getPlayersAllStats']['responses']['200']['content']['json']> => {
+export type GetAllStatsResponse =
+// operations['getPlayersAllStats']['responses']['200']['content']['json'] as
+{
+    totalGames: number,
+    gamesWon: number,
+    playerId: number,
+    positionHistograms: 
+      {
+        frequency: number,
+        position: (0|1|2|3)[]
+      }[]
+    
+  }[]
+
+export type ExtendedStatResponse = (GetAllStatsResponse[number] & {
+  name: string;
+  winPercentage: number;
+})[]
+
+export const getAllStats = async (): Promise<GetAllStatsResponse> => {
   const data = await fetch(`${baseUrl}/players/all/stats`);
   return data.json()
 }
