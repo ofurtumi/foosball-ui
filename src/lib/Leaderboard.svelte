@@ -1,7 +1,5 @@
 <script lang="ts">
-  import {
-    type ExtendedStatResponse,
-  } from "./api";
+  import { type ExtendedStatResponse } from "./api";
   import Pedestal from "./Pedestal.svelte";
 
   let {
@@ -38,6 +36,7 @@
   .leaderboard-container {
     background: var(--green-2);
     margin: 0.5rem;
+    margin-top: 1rem;
     border-radius: 0.5rem;
     padding: 0.5rem;
     display: flex;
@@ -49,7 +48,7 @@
   }
 
   @media (max-width: 768px) {
-    .leaderboard-container {    
+    .leaderboard-container {
       flex-direction: column;
       overflow-y: visible;
       justify-content: start;
