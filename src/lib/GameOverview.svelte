@@ -102,7 +102,7 @@
   .game-container {
     padding: 0.5rem;
     display: flex;
-    flex-direction: column-reverse;
+    flex-direction: column;
     gap: 0.5rem;
     overflow-y: scroll;
   }

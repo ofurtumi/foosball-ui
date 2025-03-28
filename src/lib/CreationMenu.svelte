@@ -2,6 +2,7 @@
   import { createGame, type GetAllUsersResponse } from "./api";
   import Counter from "./Counter.svelte";
   import GoalInput from "./GoalInput.svelte";
+  import User from "./User.svelte";
 
   let {
     users,
@@ -20,7 +21,7 @@
     getData: () => Promise<void>;
   } = $props();
 
-  const test = async () => {};
+  let useRandomPlayers: boolean = $state(false);
 
   let api_key: string = $state("");
 
@@ -116,19 +117,121 @@
       user_positions = [];
     }
   };
+
+  let randomUsers: typeof users = $state([]);
+  const toggleRandom = (user: (typeof users)[number]) => {
+    if (randomUsers.includes(user)) {
+      randomUsers = randomUsers.filter((u) => u !== user);
+    } else {
+      randomUsers = [...randomUsers, user];
+    }
+  };
+
+  // for each user of in randomUsers, choose a random position or positions and a team
+  // the teams should be balanced
+  const chooseRandom = () => {
+    if (randomUsers.length === 0) return;
+
+    const teamSize = Math.floor(randomUsers.length / 2);
+    randomUsers = randomUsers.sort(() => Math.random() - 0.5);
+
+    const redUsers = randomUsers.slice(0, teamSize);
+    assignRandom(redUsers, "red");
+    const blueUsers = randomUsers.slice(teamSize);
+    assignRandom(blueUsers, "blue");
+  };
+
+  const assignRandom = (
+    players: GetAllUsersResponse,
+    selectedTeam: "red" | "blue"
+  ) => {
+    const size = players.length;
+
+    switch (size) {
+      case 1:
+        selected_user = players[0];
+        user_team = selectedTeam;
+        user_positions = [...positions];
+        addUser();
+        break;
+
+      case 2:
+        players.forEach((player, i) => {
+          selected_user = player;
+          user_team = selectedTeam;
+          user_positions = [...positions.slice(i * 2, (i + 1) * 2)];
+          addUser();
+        });
+        break;
+
+      case 3:
+        const doublePos = Math.floor(Math.random() * 3);
+        selected_user = players[0];
+        user_team = selectedTeam;
+        user_positions = [positions[doublePos], positions[doublePos + 1]];
+
+        let remainingPositions = positions.filter(
+          (pos) => !user_positions.includes(pos)
+        );
+        addUser();
+
+        players.slice(1).forEach((player, i) => {
+          selected_user = player;
+          user_team = selectedTeam;
+          user_positions = [remainingPositions[i]];
+          addUser();
+        });
+        break;
+
+      case 4:
+        players.forEach((player, i) => {
+          selected_user = player;
+          user_team = selectedTeam;
+          user_positions = [positions[i]];
+          addUser();
+        });
+        break;
+    }
+  };
 </script>
 
 <div class="users">
-  <label for="select-user">Select users</label>
-  <select id="select-user" bind:value={selected_user}>
-    {#await users}
-      <option>Loading...</option>
-    {:then users}
-      {#each users.filter(userFilter) as user}
-        <option value={user}>{user.name}</option>
+  <div class="random-checker">
+    <label for="select-user">Select users</label>
+    <div>
+      Assign randomly
+      <input
+        type="checkbox"
+        name="random"
+        id="random"
+        bind:checked={useRandomPlayers}
+      />
+    </div>
+  </div>
+  {#if useRandomPlayers}
+    <div class="random-user-container">
+      {#each users as user}
+        <button
+          onclick={() => {
+            toggleRandom(user);
+          }}
+          class:checked={randomUsers.includes(user)}
+        >
+          {user.name}
+        </button>
       {/each}
-    {/await}
-  </select>
+    </div>
+  {:else}
+    <select id="select-user" bind:value={selected_user}>
+      {#await users}
+        <option>Loading...</option>
+      {:then users}
+        {#each users.filter(userFilter) as user}
+          <option value={user}>{user.name}</option>
+        {/each}
+      {/await}
+    </select>
+  {/if}
 
   <div class="teams">
     <Counter bind:count={user_goals} />
@@ -196,7 +299,11 @@
   </div>
 
   <div class="input-row">
-    <button onclick={() => addUser()}>Add player</button>
+    {#if useRandomPlayers}
+      <button onclick={() => chooseRandom()}>Choose</button>
+    {:else}
+      <button onclick={() => addUser()}>Add player</button>
+    {/if}
   </div>
 
   <div class="chosen-players red">
@@ -274,6 +381,29 @@
     background: var(--green-3);
     border: none;
     border-radius: 0.25rem;
+  }
+
+  .random-checker {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .random-user-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem 1rem;
+
+    button {
+      display: flex;
+      gap: 1rem;
+      justify-content: space-between;
+      border: 1px solid var(--green-3);
+    }
+
+    .checked {
+      border: 1px solid white;
+    }
   }
 
   .input-row {

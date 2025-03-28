@@ -45,7 +45,7 @@
           ...stat,
         }))
       );
-    games = await getAllGames();
+    games = await getAllGames().then(data => data.reverse());
   };
 </script>
 
@@ -66,7 +66,7 @@
   {#if currentPage === PAGE.GAMES}
     <GameOverview {games} {users} {stats} />
   {:else if currentPage === PAGE.LEADERBOARD}
-    <Leaderboard {users} bind:allGameStats />
+    <Leaderboard  bind:allGameStats />
   {/if}
 </main>
 
