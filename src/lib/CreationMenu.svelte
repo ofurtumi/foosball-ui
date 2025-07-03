@@ -1,4 +1,5 @@
 <script lang="ts">
+    import toast from "svelte-french-toast";
   import { createGame, type GetAllUsersResponse } from "./api";
   import Counter from "./Counter.svelte";
   import GoalInput from "./GoalInput.svelte";
@@ -131,6 +132,10 @@
   // the teams should be balanced
   const chooseRandom = () => {
     if (randomUsers.length === 0) return;
+    if (chosen_users.length > 0) {
+      toast('🎲 Shuffling teams 🎲')
+      chosen_users.length = 0;
+    }
 
     const teamSize = Math.floor(randomUsers.length / 2);
     randomUsers = randomUsers.sort(() => Math.random() - 0.5);

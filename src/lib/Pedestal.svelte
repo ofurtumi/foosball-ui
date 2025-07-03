@@ -44,7 +44,11 @@
       {#each sorted.slice(3) as player}
         <li>
           <span>{player.name}</span>
-          <span>{player[sortby]}{postfix}</span>
+          {#if Number.isNaN(player[sortby])}
+            <span>&lt;5</span>
+          {:else}
+            <span>{player[sortby]}{postfix}</span>
+          {/if}
         </li>
       {/each}
     </ol>

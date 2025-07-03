@@ -19,7 +19,11 @@
       title="Total wins"
     />
     <Pedestal
-      results={[...allGameStats]}
+      results={[
+        ...allGameStats.map((stat) => {
+          return stat.totalGames < 5 ? { ...stat, winPercentage: NaN } : stat;
+        }),
+      ]}
       sortby={"winPercentage"}
       title="Win percentage"
       postfix="%"
