@@ -1,5 +1,5 @@
 <script lang="ts">
-    import toast from "svelte-french-toast";
+  import toast from "svelte-french-toast";
   import { createGame, type GetAllUsersResponse } from "./api";
   import Counter from "./Counter.svelte";
   import GoalInput from "./GoalInput.svelte";
@@ -17,7 +17,7 @@
         loading: string;
         success: string;
         error: string;
-      }
+      },
     ) => void;
     getData: () => Promise<void>;
   } = $props();
@@ -90,7 +90,7 @@
       .map((user) => ({
         playerId: user.id,
         playerPositions: user.positions.map(
-          (pos) => Number(positions.indexOf(pos)) as 0 | 1 | 2 | 3
+          (pos) => Number(positions.indexOf(pos)) as 0 | 1 | 2 | 3,
         ),
       }));
 
@@ -133,7 +133,7 @@
   const chooseRandom = () => {
     if (randomUsers.length === 0) return;
     if (chosen_users.length > 0) {
-      toast('🎲 Shuffling teams 🎲')
+      toast("🎲 Shuffling teams 🎲");
       chosen_users.length = 0;
     }
 
@@ -148,7 +148,7 @@
 
   const assignRandom = (
     players: GetAllUsersResponse,
-    selectedTeam: "red" | "blue"
+    selectedTeam: "red" | "blue",
   ) => {
     const size = players.length;
 
@@ -176,7 +176,7 @@
         user_positions = [positions[doublePos], positions[doublePos + 1]];
 
         let remainingPositions = positions.filter(
-          (pos) => !user_positions.includes(pos)
+          (pos) => !user_positions.includes(pos),
         );
         addUser();
 
@@ -255,7 +255,7 @@
 
               if (user_positions.includes(position)) {
                 user_positions = user_positions.filter(
-                  (pos) => pos !== position
+                  (pos) => pos !== position,
                 );
               }
 
@@ -286,7 +286,7 @@
 
               if (user_positions.includes(position)) {
                 user_positions = user_positions.filter(
-                  (pos) => pos !== position
+                  (pos) => pos !== position,
                 );
               }
 
@@ -371,12 +371,14 @@
   .users {
     padding: 1rem;
     margin: 0.5rem;
+    margin-top: 1rem;
     background: var(--green-2);
     display: flex;
     flex-direction: column;
     border-radius: 0.5rem;
     gap: 1rem;
-    margin-top: 1rem;
+    overflow-y: scroll;
+    width: fit-content;
   }
 
   input,
@@ -477,7 +479,7 @@
 
   .player-row {
     list-style: none;
-    padding: 0.5rem;
+    padding: 0.5rem 0;
     border-radius: 0.25rem;
 
     display: grid;
