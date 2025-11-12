@@ -377,8 +377,11 @@
     flex-direction: column;
     border-radius: 0.5rem;
     gap: 1rem;
-    overflow-y: scroll;
-    width: fit-content;
+
+    @media (min-width: 768px) {
+      overflow-y: scroll;
+      width: fit-content;
+    }
   }
 
   input,
